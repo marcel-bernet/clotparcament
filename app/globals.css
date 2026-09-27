@@ -88,3 +88,4 @@ h3 { font-size: 1rem; margin: 20px 0 8px; }
 
 footer { display: flex; justify-content: space-between; align-items: center; margin-top: 28px; gap: 8px; overflow-wrap: anywhere; }
 footer button.link { margin: 0; }
+button.primary.google { width: 100%; margin-top: 12px; }

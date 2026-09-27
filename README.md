@@ -19,7 +19,7 @@ GitHub repo (Next.js app)
 GitHub Pages (static files only: HTML/JS/CSS)
    │  HTTPS, official Supabase JS client, running in the browser
    ▼
-Supabase: Auth (email link / 6-digit code) · PostgreSQL · Row Level Security · SQL functions
+Supabase: Auth (Sign in with Google) · PostgreSQL · Row Level Security · SQL functions
 ```
 
 - There is **no application server**. The browser talks directly to Supabase.
@@ -34,7 +34,7 @@ Supabase: Auth (email link / 6-digit code) · PostgreSQL · Row Level Security �
 | Hosting | GitHub Pages | Free, no server |
 | CI/CD | GitHub Actions | Free, builds and deploys on push |
 | DB + Auth | Supabase Free plan | Postgres + Auth + RLS, no backend to run |
-| Email sending | Gmail SMTP (configured in Supabase) | Supabase's built-in sender only mails project team members |
+| Login | Sign in with Google (Supabase Auth provider) | One tap; no emails, no passwords, no SMTP. Google Cloud is used **only** for the free OAuth client |
 | Maps | Google Maps URL | Free, no API key |
 
 Dependencies: `next`, `react`, `react-dom`, `@supabase/supabase-js` (+ TypeScript types). Nothing else. No CSS framework.
@@ -45,7 +45,7 @@ Dependencies: `next`, `react`, `react-dom`, `@supabase/supabase-js` (+ TypeScrip
 app/
   layout.tsx            HTML shell, lang="ca"
   page.tsx              Login state + membership check → main screen
-  Login.tsx             Email → link or 6-digit code
+  Login.tsx             "Entra amb Google" button + friendly error if not invited
   ParkingButtons.tsx    The two big buttons, geolocation, save, "Desfés" (undo)
   Recommendations.tsx   Calls recommend_parking(), renders top 3 + Google Maps links
   Invites.tsx           Admin-only: invite/remove members, WhatsApp share link
@@ -87,19 +87,17 @@ npm run build                # static site in ./out (uses basePath /clotparcamen
 ## Supabase setup (from scratch)
 
 1. Create a project (Free plan, region West EU / Paris).
-2. **Authentication → Sign In / Providers**: Email enabled; **Allow new users to sign up = ON** (who may sign up is controlled by the `only_invited_users` trigger).
+2. **Authentication → Sign In / Providers**: **Allow new users to sign up = ON** (who may sign up is controlled by the `only_invited_users` trigger). Email provider may stay enabled; the app doesn't use it.
 3. **Authentication → URL Configuration**:
    - Site URL: `https://marcel-bernet.github.io/clotparcament/`
    - Redirect URLs: `https://marcel-bernet.github.io/clotparcament/**` and `http://localhost:3000/**`
-4. **Authentication → Emails → SMTP Settings**: custom SMTP via Gmail (`smtp.gmail.com`, port 465, username = Gmail address, password = a Google *app password*). Sender name `Clotparcament`.
-5. **Authentication → Emails → Templates → Magic Link**: Catalan subject and body. The body must contain both `{{ .ConfirmationURL }}` (button) and `{{ .Token }}` (6-digit code):
-   ```html
-   <h2>Entra a Clotparcament</h2>
-   <p><a href="{{ .ConfirmationURL }}" style="display:inline-block;padding:14px 22px;background:#1f6f43;color:#ffffff;text-decoration:none;border-radius:10px;font-weight:bold">Entra</a></p>
-   <p>O escriu aquest codi a l'aplicació:</p>
-   <p style="font-size:28px;font-weight:bold;letter-spacing:6px">{{ .Token }}</p>
-   <p style="color:#666">Si no has demanat aquest correu, pots ignorar-lo.</p>
-   ```
+4. **Google Cloud Console** (https://console.cloud.google.com, free):
+   - Create project `clotparcament`.
+   - **Google Auth Platform → Get started**: app name `Clotparcament`, audience **External**. Then **Audience → Publish app** (basic scopes need no Google verification; "Testing" mode would only allow listed test users).
+   - **Clients → Create client → Web application**:
+     - Authorized JavaScript origins: `https://marcel-bernet.github.io`, `http://localhost:3000`
+     - Authorized redirect URI: the **Callback URL** shown in Supabase's Google provider page (`https://<project-ref>.supabase.co/auth/v1/callback`)
+5. **Supabase → Authentication → Sign In / Providers → Google**: enable, paste Client ID and Client secret (the secret lives only in Supabase), save.
 6. **SQL Editor**: run `supabase/001_schema.sql`.
 7. Create the first (admin) user: Authentication → Users → Add user → Create new user (any password, it is never used; Auto Confirm ON). Then:
    ```sql
@@ -111,11 +109,13 @@ npm run build                # static site in ./out (uses basePath /clotparcamen
 
 ## Authentication flow
 
-1. User enters their email → `supabase.auth.signInWithOtp({ email, shouldCreateUser: true })`.
-2. If the email has no account yet, Supabase tries to create one. The `before insert on auth.users` trigger `only_invited_users` **rejects it unless the email is in `group_invites`**. No email is sent to strangers. The app shows "Aquest correu no està convidat".
-3. Supabase emails a link **and** a 6-digit code. Tapping the link returns to the app logged in; typing the code (`verifyOtp`) does the same. The code exists because iPhone home-screen apps don't share login with Safari.
-4. Sessions persist in the browser (localStorage) and refresh automatically. No passwords exist.
+1. User taps **Entra amb Google** → `supabase.auth.signInWithOAuth({ provider: "google", redirectTo: <app url> })`.
+2. Google confirms the person's identity and email, then returns to Supabase.
+3. If this Google email has no Supabase account yet, Supabase tries to create one. The `before insert on auth.users` trigger `only_invited_users` **rejects it unless the email is in `group_invites`**. Supabase then redirects back with `error_description=Database error saving new user`; the app shows "Aquest compte de Google no està convidat".
+4. If allowed, Supabase redirects back to the app with the session; supabase-js stores it in the browser (localStorage) and refreshes it automatically. No passwords exist.
 5. After login, the app reads the user's row in `group_members`. No active row → "no formes part del grup".
+
+An existing user created by email (e.g. the admin, created in the dashboard) is automatically linked to the Google identity with the same verified email.
 
 Authentication (who you are) and authorization (which group you belong to) are separate: logging in grants nothing by itself.
 
@@ -205,7 +205,7 @@ Returned columns: `latitude, longitude, successes, failures, similar_successes, 
 
 - **Supabase pauses free projects after ~7 days without activity.** `keep-alive.yml` calls `ping()` every Monday and Thursday. Normal use also keeps it awake. If it ever pauses: Supabase dashboard → Restore project (data isn't lost).
 - **GitHub disables scheduled workflows** in repos with no commits for 60 days; GitHub emails you, and one click (Actions → Keep Supabase awake → Enable workflow) turns it back on.
-- **Gmail** allows ~500 emails/day. Supabase applies its own rate limit on login emails (default ~30/hour with custom SMTP).
+- **Google login** has no cost or quota relevant at this scale. The OAuth client never expires. If the Google Cloud project is deleted, login stops working.
 - Supabase Free: 500 MB database. Each event is ~100 bytes, so millions of events fit.
 
 ## Testing
@@ -234,10 +234,10 @@ Manual checks still to do on a real phone: see PROJECT_STATUS.md.
 | Symptom | Likely cause / fix |
 |---|---|
 | "Falta la configuració de Supabase" | `.env.local` or the GitHub Variables are missing/misnamed |
-| Login email never arrives | Check spam; Supabase → Authentication → Emails → SMTP settings; Gmail app password revoked? |
-| "Aquest correu no està convidat" | Admin must invite that exact email first |
-| Link opens but not logged in (iPhone home-screen app) | Type the 6-digit code instead |
-| Link goes to wrong site / error about redirect | Authentication → URL Configuration redirect URLs |
+| "Aquest compte de Google no està convidat" | Admin must invite that exact Google email first |
+| Google shows "Access blocked" / "app not verified" / only test users | Google Auth Platform → Audience → **Publish app** |
+| Google error `redirect_uri_mismatch` | Google client's redirect URI must equal Supabase's Google Callback URL exactly |
+| Back in the app but not logged in / wrong site | Supabase → Authentication → URL Configuration redirect URLs |
 | "No formes part del grup" | The invite was removed: invite them again (re-inviting an existing account re-activates it) |
 | "No tenim permís per saber on ets" | Enable location for the site in the browser/phone settings |
 | Site shows 404 after deploy | Settings → Pages → Source must be "GitHub Actions"; check the Actions tab for errors |

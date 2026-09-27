@@ -13,21 +13,23 @@ Static Next.js app (GitHub Pages) → Supabase (Auth + Postgres + RLS) directly 
 - [x] `001_schema.sql` applied to the live project (groups, group_members, parking_events, RLS)
 - [x] Owner added as member of group "Clot"
 - [x] Live check: anonymous users are denied on all tables
-- [x] App code: login (link + code), membership check, two buttons + geolocation + undo, top-3 recommendations with Google Maps links, admin invites with WhatsApp share, home-screen manifest
+- [x] App code: login (Sign in with Google), membership check, two buttons + geolocation + undo, top-3 recommendations with Google Maps links, admin invites with WhatsApp share, home-screen manifest
 - [x] `002_invites_and_recommendations.sql` written and tested locally (NOT yet applied to live project)
 - [x] GitHub Actions: deploy.yml, keep-alive.yml (NOT yet pushed)
 - [x] README.md
 
 ## In progress / pending (in order)
 
-1. **Gmail SMTP in Supabase** (Authentication → Emails → SMTP Settings) + Catalan Magic Link template. ← current user task
+1. **Google login**: Google Cloud OAuth client + enable Google provider in Supabase. ← current user task
 2. Run `supabase/002_invites_and_recommendations.sql` in the SQL editor.
 3. Turn **Allow new users to sign up** back ON (invite trigger now controls access).
-4. Test login locally (`npm run dev`) with the owner's email.
+4. Test login locally (`npm run dev`) with the owner's Google account.
 5. GitHub: Settings → Pages → Source = GitHub Actions; add the two Action **Variables**.
 6. Push code → first deploy.
 7. Test on a real phone: login, location allowed/denied, both buttons, undo, recommendations, Maps link, Add to home screen.
 8. Invite a second person; test invited, uninvited and removed flows.
+
+Decision log: login switched from email link/code to Sign in with Google (user choice, 2026-09-28): no SMTP needed.
 
 ## Required environment variables (names only)
 
@@ -46,4 +48,4 @@ Local: `.env.local` (git-ignored). CI: GitHub Actions **Variables** (not secrets
 
 ## Immediate next task
 
-Configure Gmail SMTP in Supabase (Authentication → Emails → SMTP Settings), then paste the Catalan Magic Link template.
+Set up Google login: Google Cloud OAuth client (web) → Supabase → Authentication → Sign In / Providers → Google.

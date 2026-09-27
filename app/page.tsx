@@ -17,7 +17,7 @@ export default function Home() {
   // Increased after every saved event, so the recommendations reload.
   const [refreshKey, setRefreshKey] = useState(0);
 
-  // Keep track of whether the user is logged in (also picks up the magic link on page load).
+  // Keep track of whether the user is logged in (also picks up the Google login when returning to the app).
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
       setSession(data.session);

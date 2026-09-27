@@ -56,7 +56,7 @@ export default function Invites({ groupId }: { groupId: string }) {
   // Prefilled WhatsApp message with the app link. The admin picks the contact in WhatsApp.
   function whatsappUrl(target: string): string {
     const appUrl = window.location.origin + window.location.pathname;
-    const text = `Hola! T'he convidat a Clotparcament 🚗\nObre ${appUrl} i entra amb el correu ${target}.`;
+    const text = `Hola! T'he convidat a Clotparcament 🚗\nObre ${appUrl} i toca «Entra amb Google» amb el compte ${target}.`;
     return `https://wa.me/?text=${encodeURIComponent(text)}`;
   }
 
@@ -65,7 +65,7 @@ export default function Invites({ groupId }: { groupId: string }) {
       <summary>Gestiona el grup</summary>
 
       <form onSubmit={invite}>
-        <label htmlFor="invite-email">Convida algú (correu electrònic)</label>
+        <label htmlFor="invite-email">Convida algú (el seu correu de Google / Gmail)</label>
         <input
           id="invite-email"
           type="email"
