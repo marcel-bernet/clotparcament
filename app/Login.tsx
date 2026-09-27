@@ -52,7 +52,7 @@ export default function Login() {
       </button>
       {message && <p className="error">{message}</p>}
       <p className="small">
-        <Link href="/privacitat/">Privacitat</Link>
+        <Link href="/privacitat/">Privacitat</Link> · <Link href="/condicions/">Condicions del servei</Link>
       </p>
     </main>
   );

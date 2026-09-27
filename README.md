@@ -50,6 +50,7 @@ app/
   Recommendations.tsx   Calls recommend_parking(), renders top 3 + Google Maps links
   Invites.tsx           Admin-only: invite/remove members, WhatsApp share link
   privacitat/page.tsx   Privacy policy (Catalan), required by Google for the OAuth app
+  condicions/page.tsx   Terms of service (Catalan), linked from the Google consent screen
   manifest.ts, icon.svg "Add to home screen" support
   globals.css           All styles
 lib/supabase.ts         The single Supabase client
@@ -94,7 +95,7 @@ npm run build                # static site in ./out (uses basePath /clotparcamen
    - Redirect URLs: `https://marcel-bernet.github.io/clotparcament/**` and `http://localhost:3000/**`
 4. **Google Cloud Console** (https://console.cloud.google.com, free):
    - Create project `clotparcament`.
-   - **Google Auth Platform → Get started**: app name `Clotparcament`, audience **External**. **Branding**: no logo (a logo forces a manual review); home page `https://marcel-bernet.github.io/clotparcament/`, privacy policy `https://marcel-bernet.github.io/clotparcament/privacitat/`, authorized domain `marcel-bernet.github.io`. Then **Audience → Publish app** (basic scopes need no Google verification; "Testing" mode would only allow listed test users).
+   - **Google Auth Platform → Get started**: app name `Clotparcament`, audience **External**. **Branding**: no logo (a logo forces a manual review); home page `https://marcel-bernet.github.io/clotparcament/`, privacy policy `https://marcel-bernet.github.io/clotparcament/privacitat/`, terms `https://marcel-bernet.github.io/clotparcament/condicions/`, authorized domain `marcel-bernet.github.io`. Then **Audience → Publish app** (basic scopes need no Google verification; "Testing" mode would only allow listed test users).
    - **Clients → Create client → Web application**:
      - Authorized JavaScript origins: `https://marcel-bernet.github.io`, `http://localhost:3000`
      - Authorized redirect URI: the **Callback URL** shown in Supabase's Google provider page (`https://<project-ref>.supabase.co/auth/v1/callback`)
