@@ -1,0 +1,20 @@
+# Free Supabase projects pause after ~7 days without activity.
+# This calls the tiny public function ping() twice a week so that never happens.
+name: Keep Supabase awake
+
+on:
+  schedule:
+    - cron: "17 6 * * 1,4" # Mondays and Thursdays, 06:17 UTC
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          curl --fail --silent --show-error -X POST \
+            "${{ vars.NEXT_PUBLIC_SUPABASE_URL }}/rest/v1/rpc/ping" \
+            -H "apikey: ${{ vars.NEXT_PUBLIC_SUPABASE_ANON_KEY }}" \
+            -H "Content-Type: application/json" -d '{}'
