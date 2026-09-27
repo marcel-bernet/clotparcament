@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { supabase } from "@/lib/supabase";
 
 // Login = one button: "Entra amb Google".
@@ -50,6 +51,9 @@ export default function Login() {
         {busy ? "Obrint Google…" : "Entra amb Google"}
       </button>
       {message && <p className="error">{message}</p>}
+      <p className="small">
+        <Link href="/privacitat/">Privacitat</Link>
+      </p>
     </main>
   );
 }
