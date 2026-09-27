@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { supabase } from "@/lib/supabase";
+import { CarIcon, SearchIcon } from "./icons";
 
 type Result = "success" | "fail";
 type Status =
@@ -92,11 +93,13 @@ export default function ParkingButtons({ groupId, onSaved }: { groupId: string; 
 
   return (
     <section className="actions">
-      <button className="big success" disabled={busy} onClick={() => record("success")}>
-        🅿️ HE APARCAT AQUÍ
+      <button className="pill big success" disabled={busy} onClick={() => record("success")}>
+        <CarIcon />
+        He aparcat aquí
       </button>
-      <button className="big fail" disabled={busy} onClick={() => record("fail")}>
-        ❌ AQUÍ NO HI HA LLOC
+      <button className="pill big fail" disabled={busy} onClick={() => record("fail")}>
+        <SearchIcon />
+        No hi ha lloc
       </button>
 
       <div className="status" aria-live="polite">

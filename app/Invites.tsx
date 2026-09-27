@@ -61,11 +61,12 @@ export default function Invites({ groupId }: { groupId: string }) {
   }
 
   return (
-    <details className="admin">
-      <summary>Gestiona el grup</summary>
+    <section className="card admin">
+      <h2>Gestiona el grup</h2>
+      <p className="muted">Afegeix el Gmail d'una persona i podrà entrar al grup del Clot amb Google.</p>
 
       <form onSubmit={invite}>
-        <label htmlFor="invite-email">Convida algú (el seu correu de Google / Gmail)</label>
+        <label htmlFor="invite-email">Correu de Google (Gmail)</label>
         <input
           id="invite-email"
           type="email"
@@ -73,7 +74,7 @@ export default function Invites({ groupId }: { groupId: string }) {
           value={email}
           onChange={(e) => setEmail(e.target.value)}
         />
-        <button className="primary" disabled={busy}>
+        <button className="pill success small-pill" disabled={busy}>
           {busy ? "Afegint…" : "Convida"}
         </button>
       </form>
@@ -89,7 +90,7 @@ export default function Invites({ groupId }: { groupId: string }) {
         </p>
       )}
 
-      <h3>Convidats</h3>
+      <h3>Membres convidats</h3>
       {invites.length === 0 && <p className="muted">Encara no has convidat ningú.</p>}
       <ul className="invites">
         {invites.map((inv) => (
@@ -101,6 +102,6 @@ export default function Invites({ groupId }: { groupId: string }) {
           </li>
         ))}
       </ul>
-    </details>
+    </section>
   );
 }

@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
+import { SparkleIcon } from "./icons";
 
 // One row returned by the SQL function recommend_parking (supabase/002_…sql).
 type Recommendation = {
@@ -23,11 +24,11 @@ function plural(n: number, one: string, many: string): string {
   return `${n} ${n === 1 ? one : many}`;
 }
 
-// Same thresholds as documented in README.md.
-function label(score: number): string {
-  if (score >= 0.6) return "Bona opció";
-  if (score >= 0.35) return "Resultats mixtos";
-  return "Poc probable";
+// Same thresholds as documented in README.md. The tone picks the colour.
+function label(score: number): { text: string; tone: "good" | "mixed" | "low" } {
+  if (score >= 0.6) return { text: "Bona opció", tone: "good" };
+  if (score >= 0.35) return { text: "Resultats mixtos", tone: "mixed" };
+  return { text: "Poc probable", tone: "low" };
 }
 
 // Weekday or weekend "right now", using the same 04:00 day boundary as the SQL.
@@ -68,9 +69,11 @@ export default function Recommendations({ groupId, refreshKey }: { groupId: stri
   }, [load, refreshKey]);
 
   return (
-    <section>
+    <section className="card">
       <div className="section-title">
-        <h2>On aparcar ara</h2>
+        <h2>
+          <SparkleIcon /> Millors opcions ara
+        </h2>
         <button className="link" onClick={load}>Actualitza</button>
       </div>
 
@@ -84,21 +87,26 @@ export default function Recommendations({ groupId, refreshKey }: { groupId: stri
       )}
 
       <ol className="recs">
-        {items?.map((r, i) => (
-          <li key={`${r.latitude},${r.longitude}`}>
-            <a href={mapsUrl(r.latitude, r.longitude)} target="_blank" rel="noopener noreferrer">
-              <strong>
-                {i + 1}. {label(r.score)}
-              </strong>
-              <span>{explanation(r)}</span>
-              <span className="muted">
-                En total: {plural(r.successes, "aparcament", "aparcaments")},{" "}
-                {plural(r.failures, "cerca", "cerques")} sense lloc.
-              </span>
-              <span className="maps">Obre a Google Maps ›</span>
-            </a>
-          </li>
-        ))}
+        {items?.map((r, i) => {
+          const l = label(r.score);
+          return (
+            <li key={`${r.latitude},${r.longitude}`}>
+              <a href={mapsUrl(r.latitude, r.longitude)} target="_blank" rel="noopener noreferrer">
+                <span className={`num ${l.tone}`}>{i + 1}</span>
+                <span className="rec-body">
+                  <strong>{l.text}</strong>
+                  <span className="stats">
+                    {plural(r.successes, "encert", "encerts")} · {plural(r.failures, "fallada", "fallades")}
+                  </span>
+                  <span className="why">{explanation(r)}</span>
+                  <span className="maps">Obre a Google Maps</span>
+                </span>
+                <span className={`badge ${l.tone}`}>{Math.round(r.score * 100)}%</span>
+                <span className="chevron" aria-hidden="true">›</span>
+              </a>
+            </li>
+          );
+        })}
       </ol>
     </section>
   );

@@ -7,6 +7,8 @@ import Login from "./Login";
 import ParkingButtons from "./ParkingButtons";
 import Recommendations from "./Recommendations";
 import Invites from "./Invites";
+import Header from "./Header";
+import { ClotScene } from "./icons";
 
 type Membership = { group_id: string; role: "member" | "admin" } | null;
 
@@ -16,6 +18,7 @@ export default function Home() {
   const [membership, setMembership] = useState<Membership | "loading">("loading");
   // Increased after every saved event, so the recommendations reload.
   const [refreshKey, setRefreshKey] = useState(0);
+  const [peopleOpen, setPeopleOpen] = useState(false);
 
   // Keep track of whether the user is logged in (also picks up the Google login when returning to the app).
   useEffect(() => {
@@ -54,8 +57,12 @@ export default function Home() {
     return <Login />;
   }
 
+  const isAdmin = membership !== "loading" && membership?.role === "admin";
+
   return (
     <main>
+      <Header onPeople={isAdmin ? () => setPeopleOpen((o) => !o) : undefined} peopleOpen={peopleOpen} />
+
       {membership === "loading" && <p className="muted">Carregant…</p>}
 
       {membership === null && (
@@ -67,9 +74,14 @@ export default function Home() {
 
       {membership && membership !== "loading" && (
         <>
+          {isAdmin && peopleOpen && <Invites groupId={membership.group_id} />}
+          <section className="hero">
+            <h1>Entre tots trobem més llocs</h1>
+            <p>Comparteix on aparques o on no has trobat lloc, i ajuda la resta del veïnat.</p>
+            <ClotScene />
+          </section>
           <ParkingButtons groupId={membership.group_id} onSaved={() => setRefreshKey((k) => k + 1)} />
           <Recommendations groupId={membership.group_id} refreshKey={refreshKey} />
-          {membership.role === "admin" && <Invites groupId={membership.group_id} />}
         </>
       )}
 

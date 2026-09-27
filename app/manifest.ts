@@ -5,15 +5,15 @@ export const dynamic = "force-static";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "Clotparcament",
-    short_name: "Clotparcament",
+    name: "ClotParcament",
+    short_name: "ClotParcament",
     description: "On aparcar al Clot",
     lang: "ca",
     start_url: "./",
     scope: "./",
     display: "standalone",
-    background_color: "#f4f6f4",
-    theme_color: "#1f6f43",
+    background_color: "#fbf6ec",
+    theme_color: "#fbf6ec",
     icons: [{ src: "icon.svg", sizes: "any", type: "image/svg+xml" }],
   };
 }

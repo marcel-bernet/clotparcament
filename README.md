@@ -45,6 +45,8 @@ Dependencies: `next`, `react`, `react-dom`, `@supabase/supabase-js` (+ TypeScrip
 app/
   layout.tsx            HTML shell, lang="ca"
   page.tsx              Login state + membership check → main screen
+  Header.tsx            Logo bar; admins get a people icon that opens group management
+  icons.tsx             Inline SVG icons + the Clot illustration (no icon library)
   Login.tsx             "Entra amb Google" button + friendly error if not invited
   ParkingButtons.tsx    The two big buttons, geolocation, save, "Desfés" (undo)
   Recommendations.tsx   Calls recommend_parking(), renders top 3 + Google Maps links
@@ -189,6 +191,7 @@ Returned columns: `latitude, longitude, successes, failures, similar_successes, 
 
 ### How the app explains a result (Recommendations.tsx)
 
+- Percentage badge = `round(score × 100)`, coloured like the label.
 - Label: score ≥ 0.6 → **Bona opció**; ≥ 0.35 → **Resultats mixtos**; else **Poc probable**.
 - Line 1: "N aparcaments del grup en dies laborables/en cap de setmana a una hora semblant, M cerques sense lloc" (or "based on general history" if no similar events).
 - Line 2: total successes and failed searches in the area.

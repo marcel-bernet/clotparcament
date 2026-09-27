@@ -11,23 +11,22 @@ Static Next.js app (GitHub Pages) → Supabase (Auth + Postgres + RLS) directly 
 - [x] GitHub repo `marcel-bernet/clotparcament`
 - [x] Supabase project (Free, EU); sign-ups OFF for now; URL configuration set
 - [x] `001_schema.sql` applied to the live project (groups, group_members, parking_events, RLS)
-- [x] Owner added as member of group "Clot"
+- [x] Owner added as member of group "Clot" (admin)
+- [x] Google login configured (Google Cloud OAuth client, published) and tested locally
+- [x] `002_invites_and_recommendations.sql` applied to the live project; sign-ups ON (invite trigger controls access)
+- [x] Restyle (cream/green theme, illustrated hero, pill buttons, recommendation cards)
+- [x] Code pushed to GitHub
 - [x] Live check: anonymous users are denied on all tables
 - [x] App code: login (Sign in with Google), membership check, two buttons + geolocation + undo, top-3 recommendations with Google Maps links, admin invites with WhatsApp share, home-screen manifest
-- [x] `002_invites_and_recommendations.sql` written and tested locally (NOT yet applied to live project)
-- [x] GitHub Actions: deploy.yml, keep-alive.yml (NOT yet pushed)
+- [x] GitHub Actions: deploy.yml, keep-alive.yml
 - [x] README.md
 
 ## In progress / pending (in order)
 
-1. **Google login**: Google Cloud OAuth client + enable Google provider in Supabase. ← current user task
-2. Run `supabase/002_invites_and_recommendations.sql` in the SQL editor.
-3. Turn **Allow new users to sign up** back ON (invite trigger now controls access).
-4. Test login locally (`npm run dev`) with the owner's Google account.
-5. GitHub: Settings → Pages → Source = GitHub Actions; add the two Action **Variables**.
-6. Push code → first deploy.
-7. Test on a real phone: login, location allowed/denied, both buttons, undo, recommendations, Maps link, Add to home screen.
-8. Invite a second person; test invited, uninvited and removed flows.
+1. GitHub: Settings → Pages → Source = GitHub Actions; add the two Action **Variables**.
+2. Re-run the deploy workflow (Actions → Deploy to GitHub Pages → Run workflow).
+3. Test on a real phone: login, location allowed/denied, both buttons, undo, recommendations, Maps link, Add to home screen.
+4. Invite a second person; test invited, uninvited and removed flows.
 
 Decision log: login switched from email link/code to Sign in with Google (user choice, 2026-09-28): no SMTP needed.
 
@@ -43,9 +42,9 @@ Local: `.env.local` (git-ignored). CI: GitHub Actions **Variables** (not secrets
 ## Current database state (live Supabase)
 
 - Tables: `groups` (1 row: Clot), `group_members` (1 row: owner), `parking_events` (empty). RLS enabled on all.
-- Functions: `is_group_member`.
-- Not yet applied: `role` column, `group_invites`, auth.users triggers, `is_group_admin`, `recommend_parking`, `ping`.
+- Also: `group_invites` table, `role` column, triggers on auth.users (only_invited_users, join_invited_groups) and group_invites (invite_added, invite_removed).
+- Functions: `is_group_member`, `is_group_admin`, `recommend_parking`, `ping`.
 
 ## Immediate next task
 
-Set up Google login: Google Cloud OAuth client (web) → Supabase → Authentication → Sign In / Providers → Google.
+GitHub → Settings → Pages → Source: GitHub Actions; add Action Variables NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY; re-run the deploy workflow.
