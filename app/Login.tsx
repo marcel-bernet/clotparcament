@@ -19,7 +19,7 @@ export default function Login() {
     const description = params.get("error_description");
     if (!description) return;
     setMessage(
-      description.includes("Database error")
+      description.includes("not invited") || description.includes("Database error")
         ? "Aquest compte de Google no està convidat. Demana a l'administrador que afegeixi el teu correu."
         : "No s'ha pogut entrar. Torna-ho a provar."
     );
